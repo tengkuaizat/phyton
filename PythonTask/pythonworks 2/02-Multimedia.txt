@@ -1,0 +1,485 @@
+
+
+
+
+
+
+				DAT205 - PYTHON
+			          Multimedia
+
+				      by
+
+				 Dr Simon Lock
+
+~
+PYGAME
+
+  o  Pygame is a library to ease the development of games in Python
+
+  o  It comes as standard on the Raspberry Pi
+
+  o  You can install it on other platforms, but it can be tricky !
+
+  o  It's a big selling point of the Raspberry Pi and many tutorials use it
+
+  o  We aren't specifically interested in games development in this module
+
+  o  PyGame does however offer some very useful functionality that we can use
+
+  o  It does a lot of the cool stuff that you know and love from Processing
+
+~
+PYGAME FEATURES
+
+  o  Audio file playback
+
+  o  Midi
+
+  o  Video playback (only MPEG1)
+
+  o  Webcam access
+
+  o  Graphics
+
+  o  Keyboard and Mouse interaction
+
+~
+WEBCAMS
+
+    The following works well on Raspberry Pi, other platforms are uncertain !
+
+    Import the camera module of the pygame library
+&	import pygame.camera as camera
+
+    Initialise the camera module
+&	camera.init()
+
+    Get a list of available cameras
+&	cameras = camera.list_cameras()
+
+    Print the list of cameras found (if any)
+&	if cameras != None:
+&		for cam in cameras: print(cam)
+
+    Print a suitable message if not cameras are available
+&	else: print("No cameras found")
+
+~
+SEPIA IMAGE CAPTURE
+
+    We will need to run the following on a Raspberry Pi with a camera attached
+
+&	import pygame.camera as camera
+&	import pygame.image as image
+&	import pygame
+
+&	camera.init()
+&	grabber = camera.Camera("/dev/video0",[320,240],"RGB")
+&	grabber.start()
+&	grab = grabber.get_image()
+&	pixels = pygame.PixelArray(grab)
+&	for y in range (0,grab.get_height()):
+&	  for x in range (0,grab.get_width()):
+&	    pixel = pygame.Color(pixels[x,y])
+&	    pixel.r = pixel.a
+&	    pixel.g = int(pixel.a * 0.9)
+&	    pixel.b = int(pixel.a * 0.7)
+&	    pixels[x,y] = pixel
+&	pixels = None
+&	image.save(grab,"/home/pi/image.jpg")
+
+~
+DRAWING GRAPHICS PRIMITIVES
+
+    There are lots of drawing functions in <B>pygame.draw</B>, here are a selection:
+
+	<B>rect</B>	 draws a rectangle
+	<B>polygon</B>	 draws a shape with any number of sides
+	<B>circle</B>	 draws a circle around a point
+	<B>ellipse</B>	 draws an oval inside a rectangular bounding box
+	<B>arc</B>	 draws a partial section of an ellipse
+	<B>line</B>	 draws a straight line segment
+	<B>lines</B>	 draws multiple contiguous line segments
+	<B>aaline</B>	 draws an antialiased line
+	<B>aalines</B>	 draws a connected sequence of antialiased lines
+
+    Each function takes a surface to draw onto, a colour to use for drawing,
+    coordinates for drawing (as appropriate) as a list and a stroke weight
+
+    Documentation on the above functions can be found on the PyGame website:
+
+%      http://www.pygame.org/docs/ref/draw.html
+
+~
+DRAWING EXAMPLE
+
+&	import pygame, time
+&
+    Initialise display for drawing
+&	pygame.display.init()
+
+    Set display size and get a canvas (surface) for drawing onto
+&	canvas = pygame.display.set_mode((320,240))
+
+    Create a colour and a bounding box
+&	redish = (255, 50, 50)
+&	bounds = pygame.Rect(100, 100, 50, 30)
+
+    Draw a rectangle using the colour and bounding box with a stroke of 2
+&	pygame.draw.rect(canvas, redish, bounds, 2)
+
+    Refresh the display (causes all drawing to be applied to the screen)
+&	pygame.display.update()
+
+    Wait for 5 seconds and then close the display window
+&	time.sleep(5)
+&	pygame.display.quit()
+~
+ADDITIONAL DRAWING FUNCTIONS
+
+    There are lots more additional drawing functions in <B>gfxdraw</B>:
+
+	<B>pixel</B>		 draws a single pixel
+	<B>rectangle</B>	 draws a rectangle
+	<B>line</B>		 draws a line
+	<B>arc</B>		 draws an arc
+	<B>ellipse</B>		 draws an ellipse
+	<B>aaellipse</B>	 draws an anti-aliased ellipse
+	<B>filled_ellipse</B>	 draws a filled ellipse
+	<B>pie</B>		 draws a slice of a pie chart
+	<B>trigon</B>		 draws a triangle
+	<B>aatrigon</B>	 draws an anti-aliased triangle
+	<B>filled_trigon</B>	 draws a filled trigon
+	<B>polygon</B>		 draws a polygon
+	<B>aapolygon</B>	 draws an anti-aliased polygon
+	<B>filled_polygon</B>	 draws a filled polygon
+	<B>textured_polygon</B> draws a textured polygon
+	<B>bezier</B>		 draws a bezier curve
+
+    Each takes a surface to draw onto, some coordinates and a colour to use
+
+~
+IMAGE DRAWING
+
+&	import pygame, time
+&
+    Initialise display for drawing
+&	pygame.display.init()
+
+    Set display size and get a canvas (surface) for drawing onto
+&	canvas = pygame.display.set_mode((320,240))
+
+    Load in an image from the resources folder
+&	img = pygame.image.load("res/kitten.png")
+
+    "Blit" the image onto the canvas
+&	canvas.blit(img,(110,80))
+
+    Refresh the display
+&	pygame.display.update()
+
+    Wait for 5 seconds and then close the display window
+&	time.sleep(5)
+&	pygame.display.quit()
+
+~
+ANIMATION
+
+    Animation is a case of changing coordinates and refreshing the display
+
+    Start out with all the usual stuff
+&	import pygame, time
+&	pygame.display.init()
+&	canvas = pygame.display.set_mode((320,240))
+&	img = pygame.image.load("res/kitten.png")
+
+    Loop from -50 to 300, moving the image and updating the display each time 
+&	for x in range(-50,300):
+&		canvas.blit(img,(x*3,80))
+&		pygame.display.update()
+
+    Close window when we have finished
+&	pygame.display.quit()
+
+    What is this going to look like ?
+
+~
+PYGAME AUDIO PLAYBACK
+
+  o  Pygame supports two kinds of audio playback
+
+	-  <B>Music</B>: A single, large audio file.
+	   Playback is Streamed - data not loaded all at once
+	   Loading and seek time may be slow
+
+	-  <B>Sound</B>: Many small audio clips.
+	   Data is held in memory - loaded once at beginning
+	   Playback has low latency
+
+  o  It is important to use the right object for the right media !
+
+~
+SOUND PLAYBACK
+
+    Import Pygame
+&	import pygame
+
+    Initialise the audio mixer
+&	pygame.mixer.init()
+
+    Load a sample from the resources folder
+&	sample1 = pygame.mixer.Sound("res/sample1.ogg")
+
+    Play the sample
+&	sample1.play()
+
+~
+MULTIPLE SOUND PLAYBACK
+
+    Import Pygame
+&	import pygame, time
+&	
+    Initialise the audio mixer
+&	pygame.mixer.init()
+
+    Load the samples
+&	sample1 = pygame.mixer.Sound("res/sample1.ogg")
+&	sample2 = pygame.mixer.Sound("res/sample2.ogg")
+&	
+    Loop 10 times, playing both samples in a sequence
+&	for i in range(1,10):
+&		sample1.play()
+&		time.sleep(0.35)
+&		sample1.play()
+&		time.sleep(0.35)
+&		sample2.play()
+&		time.sleep(0.35)	
+
+~
+QUESTION
+
+    Why the slightly clunky playback do you think ?
+
+~
+MUSIC PLAYBACK
+
+    Import the pygame library
+&	import pygame, time
+&
+    Initialise the audio mixer
+&	pygame.mixer.init()
+
+    Load the audio file - using OGG because MP3 playback is sketchy !
+&	pygame.mixer.music.load("res/track.ogg")
+
+    Start the track playing from the beginning
+&	pygame.mixer.music.play()
+
+    Leave it to play for 8 seconds
+&	time.sleep(8)
+
+    Stop the music !
+&	pygame.mixer.music.stop()
+
+~
+MUSIC PLAYER FUNCTIONS
+
+
+    <B>load</B>	  Load a new audio file
+    <B>play</B>	  Play file (can specify number of loops and start position)
+    <B>rewind</B>	  Rewind back to beginning
+    <B>stop</B>	  Stop completely
+    <B>pause</B>	  Pause temporarily
+    <B>unpause</B>	  Continue playing from paused position
+    <B>fadeout</B>	  Fade track out (for given number of milliseconds) and stop
+    <B>set_volume</B>	  Set volume between 0.0 and 1.0
+    <B>get_volume</B>	  Get volume between 0.0 and 1.0
+    <B>get_busy</B>	  Find out if audio is currently playing
+    <B>set_pos</B>	  Set the current playback position (in milliseconds)
+    <B>get_pos</B>	  Set the current playback position (in milliseconds)
+    <B>queue</B>	  Add a new audio track to queue
+    <B>set_endevent</B>  Set the function to be called when playback ends
+
+~
+MORE ADVANCED PLAYBACK
+
+    The "play" function allows us to specify some optional parameters
+
+    First three lines as before
+&	import pygame, time
+&	pygame.mixer.init()
+&	pygame.mixer.music.load("res/track.ogg")
+
+    Play track 3 times (once plus 2 repeats) starting 20 seconds from beginning
+&	pygame.mixer.music.play(2,20.0)
+
+    Leave it to play for 8 seconds
+&	time.sleep(8)
+
+    Fade the audio out over 4 seconds
+&	pygame.mixer.music.fadeout(4000)
+
+~
+PLATFORM SPECIFIC MEDIA PLAYERS
+
+  o  PyGame media players are OK, but they have limited capabilities
+
+  o  Not very good with some audio formats (MP3)
+
+  o  Code is sometimes inefficient (interpreted Python)
+
+  o  Luckily there are plenty of third party media players available
+
+  o  But how do we interface to them to control playback ?
+
+~
+SUBPROCESSES - MAC OSX
+
+    Import the required modules
+&	import subprocess, time
+& 
+    The media player I have on my laptop is mplayer
+&	mediaplayer = "/usr/local/bin/mplayer"
+
+    Variable for the MP3 in my resources folder
+&	track = "res/track.mp3"
+
+    Create a new subprocess to play the track with the media player
+&	process = subprocess.Popen([mediaplayer,track])
+
+    Leave the track to play for 8 seconds
+&	time.sleep(8)
+
+    Kill off the process with OSX "kill" command, passing it the process ID
+&	subprocess.Popen(["kill","-TERM",str(process.pid)])
+
+~
+SUBPROCESSES - RASPBERRY PI
+
+    Import the required modules
+&	import subprocess, time
+& 
+    The media player on the Raspberry Pi is omxplayer
+&	mediaplayer = "/usr/bin/omxplayer"
+
+    Variable for the MP3 in my resources folder
+&	track = "res/track.mp3"
+
+    Create a new subprocess to play the track with the media player
+&	process = subprocess.Popen([mediaplayer,track])
+
+    Leave the track to play for 8 seconds
+&	time.sleep(8)
+
+    Kill of the process with the "pkill" command, passing it the process ID
+&	subprocess.Popen(["pkill","-TERM","-P",str(process.pid)])
+
+~
+SUBPROCESSES - MS WINDOWS
+
+  o  Windows machines have a range of different media players:
+
+	mplay32.exe  mplayer.exe  wmplayer.exe  mplayer2.exe
+
+  o  Just update the <B>mediaplayer</B> variable to suit your installation
+
+  o  You will also have to change the "kill" command to something like:
+
+	subprocess.Popen(["taskkill","/PID",str(process.pid),"/F"])
+
+>  o  Good luck with that ;o)
+
+~
+COMMUNICATING WITH SUBPROCESS
+
+  It is possible to communicate with subprocesses whilst they are running:
+
+    Import libraries as usual
+&	import subprocess, time
+& 
+    Set mediaplayer and track like last time
+&	mediaplayer = "/usr/local/bin/mplayer"
+&	track = "res/track.mp3"
+
+    Create a subprocesses as before, but this time ask for an input pipe
+&	process = subprocess.Popen([mediaplayer,track], stdin=subprocess.PIPE)
+
+    Loop 10 times, sleeping for 2 secs then sending a speedup keypress "]"
+&	for i in range(1,10):
+&		time.sleep(2)
+&		process.stdin.write("]")
+
+    Finally kill the process before we go insane
+&	subprocess.Popen(["kill","-TERM",str(process.pid)])
+
+~
+VIDEO PLAYBACK
+
+  o  The nice thing about these media players is that they also play video
+
+  o  The <U>great</U> thing about them is that they have been compiled to native code
+
+  o  This means that they can make use of custom graphics hardware (GPU on Pi)
+
+  o  As a result, they play media very efficiently (1080p @ 25fps on Pi)
+
+  o  Let's take a look...
+
+~
+VIDEO PLAYBACK - OSX
+
+&	import subprocess
+&
+&	mediaplayer = "/usr/local/bin/mplayer"
+&	server = "http://download.blender.org"
+&	filename = "/peach/trailer/trailer_1080p.mov"
+&	subprocess.Popen([mediaplayer,"-cache","8192","-fs",server+filename])
+
+~
+VIDEO PLAYBACK - RASPBERRY PI
+
+&	import subprocess
+&
+&	mediaplayer = "/usr/bin/omxplayer"
+&	server = "http://download.blender.org"
+&	filename = "/peach/trailer/trailer_1080p.mov"
+&	subprocess.Popen([mediaplayer,server+filename])
+
+~
+<R>THOUGHT EXERCISE</R>
+
+    What other subprocesses could you kick off from within Python ?
+<?>
+>	o  Web browser
+
+>	o  DVD player
+
+>	o  The "say" command
+
+>	o  Shutdown/Reboot
+
+>	o  Package or application installer
+
+>	o  Code written in Java or compiled C
+
+>	o  Any other command line or graphical application !
+</?>
+
+~
+THIS WEEK'S PRACTICAL
+
+    In this week's practical you must create a graphical visualisation
+    of a textual data file (to be given out in the practical).
+    Read in the data and use it to generate some kind of visual output.
+    As an extra challenge, limit yourself to black and white (greyscale).
+
+    Rather than using Pygame to create your visualisation
+    (which is powerful, but can be tricky to install)
+    We will be using a library called <B>graphics.py</B>
+    This can just be dropped into your folder and used (no install needed)
+
+    Documentation and some examples of the library in use will be provided
+
+    Remember - this work will form part of you assessed portfolio
+
+
